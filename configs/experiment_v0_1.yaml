@@ -1,0 +1,55 @@
+# MORPH-CG Experiment Configuration v0.1
+# This file defines the parameters for the research prototype.
+
+experiment:
+  id: morph-cg-v0.1-research-prototype
+  version: 0.1.0
+  description: First reproducible composition-path assurance experiment
+
+seed: 42
+
+models:
+  parents:
+    - id: distilbert-base-uncased
+      source: huggingface
+      architecture: distilbert-base-uncased
+      licence: apache-2.0
+      purpose: base component
+  # Second parent will be a fine-tuned variant
+
+probes:
+  suite:
+    - name: sentiment-positive-1
+      input: "This movie was great!"
+      expected: 1
+    - name: sentiment-negative-1
+      input: "Terrible film, waste of time."
+      expected: 0
+  metric: accuracy  # for this phase, using accuracy/fold rate
+
+sampling:
+  strategy: grid
+  resolution: 10  # alpha in [0, 0.1, ..., 1.0] for 2 parents
+  seed: 42
+
+baselines:
+  component_only: true
+  endpoint_only: true
+  statistical_anomaly: true
+  microsoft_scanner: false  # requires LLM, not encoder
+
+success_criteria:
+  g1_min_recall: 0.5
+  g2_detection_improvement: 0.10  # absolute
+  g5_max_cost_usd: 10
+
+output:
+  bundle_format:
+    - json
+    - csv
+  report_format: text
+
+limits:
+  max_models: 2
+  max_path_points: 11
+  harmful_behaviours: false  # only benign synthetic probes

@@ -10,7 +10,7 @@ from __future__ import annotations
 
 import csv
 import json
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
@@ -44,7 +44,7 @@ class EvidenceBundle:
     def to_dict(self) -> dict[str, Any]:
         return {
             "manifest_version": "morph-cg-0.1",
-            "generated_at": datetime.utcnow().isoformat() + "Z",
+            "generated_at": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
             "config": self.config,
             "registry_manifest": self.registry.manifest(),
             "merge_recipe": self.recipe.to_dict(),
@@ -101,7 +101,7 @@ def generate_research_memo(bundle: EvidenceBundle) -> str:
     """Generate a plain-text research memo from the evidence bundle."""
     lines = [
         "MORPH-CG Research Memo",
-        f"Generated: {datetime.utcnow().isoformat()}Z",
+        f"Generated: {datetime.now(timezone.utc).isoformat().replace('+00:00', 'Z')}",
         "=" * 60,
         "",
         "## Summary",
