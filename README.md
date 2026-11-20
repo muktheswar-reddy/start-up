@@ -4,110 +4,64 @@ A research prototype for **composition-path assurance** of combined AI models.
 
 ## What This Is
 
-This is a **research prototype**, not a product. The hypothesis: when models are merged, security-relevant behaviour can emerge that is invisible when testing each component in isolation. This prototype implements a systematic method for:
+This is a research prototype (not a product) that implements a systematic method for detecting security-relevant behaviour that may emerge when AI models are merged/composed.
 
-1. Sampling the composition configuration space (the "path")
-2. Probing each configuration
-3. Measuring non-additive behaviour
-4. Attributing findings to components or interactions
-5. Producing reproducible evidence reports
+## Quick Start (Local)
 
-## Project Structure
+```bash
+pip install -r requirements.txt
+python3 -m pytest tests/  # Run tests
+python3 app.py           # Launch Gradio demo
+```
+
+## Hugging Face Space
+
+This demo is deployed at [huggingface.co/spaces/muktheswarareddy/morph-cg](https://huggingface.co/spaces/muktheswar-reddy/morph-cg).
+
+## Package Structure
 
 ```
 morph-cg/
 ├─ morph/                    # Core package (8 modules)
-│   ├─ __init__.py
-│   ├─ config.py            # Dataclasses for experiment config
-│   ├─ registry.py          # Model registry (hashes, provenance)
-│   ├─ composition.py       # Weight interpolation, merge adapter
-│   ├─ path_sampler.py      # Sample alpha configurations
-│   ├─ probes.py            # Fixed probe suite
+│   ├─ config.py            # Experiment configuration
+│   ├─ registry.py          # Model provenance tracking
+│   ├─ composition.py       # Weight interpolation merge
+│   ├─ path_sampler.py      # Composition path sampling
+│   ├─ probes.py            # Test suite execution
 │   ├─ metrics.py           # Behaviour comparison
-│   ├─ attribution.py       # LOCO, perturbation, Shapley
-│   ├─ risk.py              # Evidence aggregation
-│   └─ reporting.py         # Bundle, JSON, CSV output
+│   ├─ attribution.py       # LOCO, Shapley analysis
+│   └─ reporting.py         # Evidence bundles
+├─ tests/                    # 58 pytest tests
 ├─ notebooks/                # 9-step Colab implementation
-│   00_project_setup.ipynb
-│   01_literature_and_benchmark.py
-│   02_parent_baselines.py
-│   03_composition_engine.py
-│   04_path_sampling.py
-│   05_probe_and_metrics.py
-│   06_interaction_attribution.py
-│   07_baselines_and_evaluation.py
-│   08_report_generation.py
 ├─ research/                 # Documentation
-│   ├─ literature_review.md
-│   ├─ threat_model.md
-│   ├─ novelty_hypotheses.md
-│   └─ experiment_protocol.md
-├─ configs/
-│   └─ experiment_v0_1.yaml
-├─ tests/                    # Pytest suite (58 tests)
-│   test_registry.py
-│   test_composition.py
-│   test_path_sampler.py
-│   test_probes.py
-│   test_metrics.py
-│   test_attribution.py
-│   test_reporting.py
-├─ results/                  # Generated artifacts
-├─ data/                     # Model files, benchmark data
-└─ reports/                  # Research memos, PDFs
+└─ app.py                    # Gradio web demo
 ```
-
-## Installation
-
-In Colab or locally:
-
-```bash
-pip install torch transformers datasets numpy pandas scipy scikit-learn matplotlib pytest safetensors
-```
-
-## Run in Colab
-
-1. Open `notebooks/00_project_setup.ipynb`
-2. Run each cell in sequence:
-   - Notebook 00: Setup environment
-   - Notebook 01: Literature and benchmark definitions
-   - Notebook 02: Load and score parent models
-   - Notebook 03: Create merged configurations
-   - Notebook 04: Sample composition path
-   - Notebook 05: Run probes, compute metrics
-   - Notebook 06: Attribution analysis
-   - Notebook 07: Baseline comparison
-   - Notebook 08: Generate evidence bundle
 
 ## Usage
 
 ```python
-from morph import registry, composition, path_sampler, probes, metrics, attribution, reporting
+from morph import registry, composition, path_sampler
 
-# Example: register a model
-reg = registry.ModelRegistry()
-reg.register("bert-base-uncased", architecture="bert")
+# Sample composition paths
+paths = path_sampler.sample_path(n_parents=2, strategy="grid", resolution=10)
 
-# Example: sample composition path
-paths = path_sampler.sample_path(n_parents=2, strategy="grid", resolution=5)
+# Merge models
+merged_weights = composition.linear_interpolation([weights_a, weights_b], [0.5, 0.5])
 
-# Example: linear interpolation
-merged = composition.linear_interpolation([state_dict_a, state_dict_b], [0.5, 0.5])
+# Run probes
+from morph.probes import run_probe_suite
+results = run_probe_suite(suite, "model-a", predict_fn)
 ```
 
-## Research Gate Rules
+## Research Background
 
-- **G1**: Reproduce at least one published result
-- **G2**: Show >10% absolute improvement over endpoint-only testing
-- **G5**: Keep compute cost under ~$10 for small-encoder prototype
+Based on the MORPH-CG Research and Startup Master Plan (18 Nov 2026). The hypotheses are that systematic composition-path sampling can detect security-relevant behaviours that component-only testing misses.
 
-## Disclaimer
+## License
 
-> This is a **research prototype**. It demonstrates a method, not a validated product. Performance claims are based on controlled experiments with small models and benign synthetic probes. Do not use for production security decisions without independent validation.
+MIT License
 
-## References
+## Citation
 
-- Wang et al., "From Purity to Peril" (USENIX Security 2025)
-- Yuan et al., "Merge Hijacking" (ACL 2025)
-- Microsoft LLM Backdoor Scanner (2026)
-- ETSI TS 104 033, NIST AI RMF
+If you use this code, please cite:
+> MORPH-CG Research Prototype (2026) - Claude Code demonstration
